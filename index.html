@@ -134,6 +134,14 @@ padding: 10px;
             color: #6b7280;
             text-decoration: line-through;
         }
+        
+        textarea {
+        resize: both!important;
+        min-width: 30vw;
+        min-height: 10vw;
+        height: auto;
+        }
+        
         .no-print { /* This class is used to hide elements during PDF generation */ }
     </style>
 </head>
@@ -273,7 +281,7 @@ padding: 10px;
                     case 'image':
                         return `<div class="flex flex-col items-center justify-center gap-2"><img src="${value || 'https://placehold.co/120x80/e2e8f0/64748b?text=No+Image'}" class="image-preview" alt="Shot ${shot.id} preview" onerror="this.onerror=null;this.src='https://placehold.co/120x80/e2e8f0/64748b?text=Error';"><label class="no-print text-xs text-blue-600 hover:text-blue-800 cursor-pointer"> Upload <input type="file" accept="image/*" class="hidden image-upload-input" data-key="${key}" data-index="${index}"></label></div>`;
                     case 'description':
-                        return `<textarea class="w-full h-24 p-2 border rounded-md" data-key="${key}" data-index="${index}" placeholder="Describe...">${value}</textarea>`;
+                        return `<textarea class="w-full h-24 p-2 border rounded-md" data-key="${key}" data-index="${index}" placeholder="Description...">${value}</textarea>`;
                     case 'shotSize':
                     case 'shotType':
                         return `<button class="w-full text-left p-2 border rounded-md hover:bg-gray-100 cell-button" data-key="${key}" data-index="${index}">${value || 'Select...'}</button>`;
