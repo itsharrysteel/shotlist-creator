@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Filmmaker's Shot List Creator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+              background-color: hsla(65, 60%, 97%, 1);
+    background-image: radial-gradient(circle at 12% 15%, hsla(81, 82%, 98%, 1) 3%, transparent 59%), radial-gradient(circle at 92% 93%, hsla(209.1176470588236, 56%, 91%, 1) 11%, transparent 79%), radial-gradient(circle at 24% 86%, hsla(13, 52%, 90%, 1) 16%, transparent 83%), radial-gradient(circle at 11% 94%, hsla(43, 55%, 90%, 1) 16%, transparent 51%), radial-gradient(circle at 44% 9%, hsla(252.79411764705875, 81%, 51%, 0.05) 13%, transparent 83%);
+    background-blend-mode: normal, normal, normal, normal, normal;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 0;
+            margin: 0;
+            padding-top: 1rem;
+        }
+        .modal-bg {
+background: rgba(255, 255, 255, 0.32);
+border-radius: 16px;
+box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+backdrop-filter: blur(20px);
+-webkit-backdrop-filter: blur(20px);
+border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+                .logo-placeholder {
+            display: inline-block;
+            vertical-align: middle;
+            width: 50px;
+            height: 25px;
+            margin-top: 10px;
+            margin-bottom: -2px;
+            transition: width 0.5s ease-in-out, border-radius 0.4s ease-in-out;
+        }
+
+.bg-white-1 {
+background: rgba(255, 255, 255, 0.22);
+border-radius: 16px;
+box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.1);
+backdrop-filter: blur(2.2px);
+-webkit-backdrop-filter: blur(2.2px);
+border: 1px solid rgba(255, 255, 255, 0.53);
+            transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+}
+
+.bg-white-2 {
+background: rgba(255, 255, 255, 0.61);
+border-radius: 16px;
+box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+backdrop-filter: blur(20px);
+-webkit-backdrop-filter: blur(20px);
+border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.button-1 {
+            font-weight: 500;
+            font-size: 1.2rem;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center; 
+            text-align: center;
+            gap: 0.5rem;
+transition: background 0.3s ease-in-out, border-color 0.2s ease-in-out, box-shadow 1.2s ease-in-out, margin-top 1s ease-in-out, margin-bottom 1s ease-in-out, margin-left 1s ease-in-out, margin-right 1s ease-in-out;
+background: rgba(255, 255, 255, 0.22);
+border-radius: 8px;
+box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.1);
+backdrop-filter: blur(2.2px);
+-webkit-backdrop-filter: blur(2.2px);
+border: 1px solid rgba(255, 255, 255, 0.53);
+padding: 10px;
+}
+
+.button-1:hover {
+background: rgba(255, 255, 255, 0.49);
+border-radius: 8px;
+box-shadow: 0px 20px 20px rgba(0, 0, 0, 0.15);
+backdrop-filter: blur(7.4px);
+-webkit-backdrop-filter: blur(7.4px);
+border: 1px solid rgba(255, 255, 255, 0.53);
+transition: background 0.3s ease-in-out, border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, margin-top 0.2s ease-in-out, margin-bottom 0.2s ease-in-out, margin-left 0.2s ease-in-out, margin-right 0.2s ease-in-out;
+margin-top: -2px;
+margin-bottom: 2px;
+cursor: pointer;
+padding: 10px;
+}
+
+        #shot-list-table th, #shot-list-table td {
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            vertical-align: middle;
+            white-space: normal;
+        }
+        #shot-list-table th {
+            background-color: #f8fafc;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .image-preview {
+            max-width: 120px;
+            max-height: 80px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+        .table-container {
+            max-height: 70vh;
+            overflow: auto;
+        }
+        /* Drag and Drop Styles */
+        .cursor-grab { cursor: grab; }
+        .row-dragging { opacity: 0.5; background: #f0f8ff; }
+        .row-drag-over { border-top: 2px solid #3b82f6; }
+        
+        #shot-list-table th.col-drag-over { border-right: 3px solid #3b82f6; }
+        #shot-list-table th.col-dragging { background-color: #e0e7ff; opacity: 0.8; }
+
+        /* Shot Status Styles */
+        .shot-completed {
+            background-color: #f0fdf4; /* A light green */
+        }
+        .shot-completed td, .shot-completed textarea, .shot-completed input {
+            color: #6b7280;
+            text-decoration: line-through;
+        }
+        .no-print { /* This class is used to hide elements during PDF generation */ }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+            <div class="logo-placeholder">
+                <img src="https://harrysteel.co.uk/Harry%20Logo%20V4.png"
+                     alt="Harry Steel Logo"
+                     class="animated-full-logo">
+            </div>
+    <div class="container mx-auto px-4 py-8">
+        <header class="text-center mb-4">
+            <h1 class="text-4xl font-bold text-gray-900">Harry's Shot List Creator</h1>
+            <p class="text-gray-600 mt-2">Design your film, shot by shot.</p>
+        </header>
+        </br>
+        <div class="bg-white-1 p-6 rounded-lg shadow-md">
+            <div class="flex justify-end mb-4 no-print">
+                 <button id="edit-columns-button" class="bg-gray-200 text-gray-700 font-semibold px-4 py-2 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 transition">Edit Columns</button>
+            </div>
+            <div class="table-container">
+                <table id="shot-list-table" class="w-full text-sm text-left text-gray-700">
+                    <thead id="shot-list-header" class="text-xs text-gray-700 uppercase"></thead>
+                    <tbody id="shot-list-body"></tbody>
+                </table>
+            </div>
+
+        </div>
+                   <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4 no-print">
+                <button id="add-shot-button" class="button-1">Add New Shot</button>
+                <button id="save-json-button" class="button-1">Save List (.json)</button>
+                <label class="button-1">
+                    Load List (.json)
+                    <input type="file" id="load-json-input" class="hidden" accept=".json,application/json">
+                </label>
+                <button id="save-pdf-button" class="button-1">Save as PDF</button>
+            </div>
+    </div>
+
+    <!-- Selection Modal -->
+    <div id="selection-modal" class="fixed inset-0 z-50 items-center justify-center hidden modal-bg">
+        <div class="bg-white-2 rounded-lg shadow-xl m-4 sm:m-8 max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <h3 id="selection-modal-title" class="text-2xl font-semibold mb-4">Select Option</h3>
+                <div id="selection-modal-content" class="space-y-4"></div>
+                <div class="mt-6">
+                    <h4 class="font-semibold text-gray-700 mb-2">Custom Input</h4>
+                    <div class="flex gap-2"><input type="text" id="selection-modal-custom-input" class="flex-grow px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"><button id="selection-modal-custom-button" class="bg-indigo-600 text-white font-semibold px-4 py-2 rounded-md hover:bg-indigo-700">Select</button></div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-6 py-3 text-right"><button id="selection-modal-close-button" class="text-gray-600 hover:text-gray-900">Close</button></div>
+        </div>
+    </div>
+
+    <!-- Columns Modal -->
+    <div id="columns-modal" class="fixed inset-0 z-50 items-center justify-center hidden modal-bg">
+        <div class="bg-white-2 rounded-lg shadow-xl m-4 sm:m-8 max-w-xl w-full max-h-[90vh] overflow-y-auto">
+             <div class="p-6">
+                <h3 class="text-2xl font-semibold mb-4">Edit Columns</h3>
+                <p class="text-sm text-gray-600 mb-6">Select which columns you want to display.</p>
+                <div id="columns-checklist" class="grid grid-cols-2 sm:grid-cols-3 gap-4"></div>
+            </div>
+            <div class="bg-gray-50 px-6 py-3 flex justify-end"><button id="columns-modal-close-button" class="bg-blue-600 text-white font-semibold px-5 py-2 rounded-md hover:bg-blue-700">Done</button></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DOM ELEMENTS ---
+            const addShotButton = document.getElementById('add-shot-button');
+            const savePdfButton = document.getElementById('save-pdf-button');
+            const saveJsonButton = document.getElementById('save-json-button');
+            const loadJsonInput = document.getElementById('load-json-input');
+            const shotListHeader = document.getElementById('shot-list-header');
+            const shotListBody = document.getElementById('shot-list-body');
+            const editColumnsButton = document.getElementById('edit-columns-button');
+            const selectionModal = document.getElementById('selection-modal');
+            const selectionModalTitle = document.getElementById('selection-modal-title');
+            const selectionModalContent = document.getElementById('selection-modal-content');
+            const selectionModalCustomInput = document.getElementById('selection-modal-custom-input');
+            const selectionModalCustomButton = document.getElementById('selection-modal-custom-button');
+            const selectionModalCloseButton = document.getElementById('selection-modal-close-button');
+            const columnsModal = document.getElementById('columns-modal');
+            const columnsChecklist = document.getElementById('columns-checklist');
+            const columnsModalCloseButton = document.getElementById('columns-modal-close-button');
+
+            const { jsPDF } = window.jspdf;
+
+            // --- STATE MANAGEMENT ---
+            let shotData = [];
+            let nextShotId = 1;
+            let draggedRowIndex = null;
+            let draggedColumnKey = null;
+            let activeRowIndex = -1;
+            let activeColumnKey = '';
+
+            const allColumns = {
+                image: ['Image', true], description: ['Description', true], scene: ['Scene', false],
+                subject: ['Subject', false], vfx: ['VFX', false], camera: ['Camera', false],
+                shotSize: ['Shot Size', true], shotType: ['Shot Type', true], movement: ['Movement', false],
+                equipment: ['Equipment', false], lens: ['Lens', false], frameRate: ['Frame Rate', false],
+                specialEquipment: ['Special Equipment', false], sound: ['Sound', false], lighting: ['Lighting', false],
+                totalEstTime: ['Total Est. Time', false], prepShootTimes: ['Prep & Shoot Times', false],
+                startTime: ['Start Time', false]
+            };
+            let visibleColumns = Object.keys(allColumns).filter(key => allColumns[key][1]);
+            
+            // --- DATA FOR MODALS ---
+            const shotSizeOptions = {
+                "Closeups": ["Extreme close-up (ECU)", "Medium close-up", "Full close-up", "Wide close-up"],
+                "Medium shots": ["Close shot", "Medium close shot", "Medium shot"],
+                "Full shots": ["Medium full shot", "Full shot"],
+                "Long shots": ["Wide shot", "Long shot", "Extreme long shot"]
+            };
+            const shotTypeOptions = {
+                "Framing": ["Over the shoulder", "Over the hip", "Two shot", "Three shot", "Point of view"],
+                "Focus / DOF": ["Rack focus", "Shallow Focus", "Deep Focus", "Tilt-Shift", "Zoom", "Dutch"],
+                "Camera Height": ["Eye level", "Low angle", "High angle", "Bird's eye view", "Overhead", "Shoulder level", "Hip level", "Knee level", "Ground Level"]
+            };
+            
+            // --- FUNCTIONS (DEFINED IN FULL BEFORE USE) ---
+            
+            const createInitialShot = () => {
+                const newShot = { id: nextShotId++, status: false };
+                Object.keys(allColumns).forEach(key => { newShot[key] = ''; });
+                return newShot;
+            };
+            
+            const resequenceShotIds = () => {
+                shotData.forEach((shot, index) => { shot.id = index + 1; });
+                nextShotId = shotData.length + 1;
+            };
+
+            const renderCellContent = (key, shot, index) => {
+                const value = shot[key] || '';
+                switch (key) {
+                    case 'image':
+                        return `<div class="flex flex-col items-center justify-center gap-2"><img src="${value || 'https://placehold.co/120x80/e2e8f0/64748b?text=No+Image'}" class="image-preview" alt="Shot ${shot.id} preview" onerror="this.onerror=null;this.src='https://placehold.co/120x80/e2e8f0/64748b?text=Error';"><label class="no-print text-xs text-blue-600 hover:text-blue-800 cursor-pointer"> Upload <input type="file" accept="image/*" class="hidden image-upload-input" data-key="${key}" data-index="${index}"></label></div>`;
+                    case 'description':
+                        return `<textarea class="w-full h-24 p-2 border rounded-md" data-key="${key}" data-index="${index}" placeholder="Describe...">${value}</textarea>`;
+                    case 'shotSize':
+                    case 'shotType':
+                        return `<button class="w-full text-left p-2 border rounded-md hover:bg-gray-100 cell-button" data-key="${key}" data-index="${index}">${value || 'Select...'}</button>`;
+                    default:
+                        return `<input type="text" class="w-full p-2 border rounded-md" data-key="${key}" data-index="${index}" value="${value}" placeholder="...">`;
+                }
+            };
+
+            const renderBody = () => {
+                shotListBody.innerHTML = '';
+                if (shotData.length === 0) { addShotRow(); }
+                else {
+                    shotData.forEach((shot, index) => {
+                        const tr = document.createElement('tr');
+                        tr.draggable = true;
+                        tr.dataset.index = index;
+                        if(shot.status) { tr.classList.add('shot-completed'); }
+                        let rowHTML = `
+                            <td class="text-center no-print"><input type="checkbox" class="form-checkbox h-5 w-5 text-green-600 rounded status-checkbox" data-index="${index}" ${shot.status ? 'checked' : ''}></td>
+                            <td class="text-center cursor-grab no-print" title="Drag to reorder">⠿</td>
+                            <td class="text-center font-semibold">${shot.id}</td>`;
+                        visibleColumns.forEach(key => { rowHTML += `<td>${renderCellContent(key, shot, index)}</td>`; });
+                        rowHTML += `<td class="text-center no-print"><button class="text-red-500 hover:text-red-700 text-xl font-bold delete-shot-button" title="Delete shot">&times;</button></td>`;
+                        tr.innerHTML = rowHTML;
+                        shotListBody.appendChild(tr);
+                    });
+                }
+            };
+            
+            const renderHeader = () => {
+                shotListHeader.innerHTML = '';
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<th class="w-12 text-center no-print" title="Status">✓</th><th class="w-12 no-print"></th><th class="w-16 text-center">Shot</th>`;
+                visibleColumns.forEach(key => {
+                    const th = document.createElement('th');
+                    th.textContent = allColumns[key][0];
+                    th.dataset.key = key;
+                    th.draggable = true;
+                    th.classList.add('cursor-grab');
+                    tr.appendChild(th);
+                });
+                tr.innerHTML += `<th class="w-16 no-print"></th>`;
+                shotListHeader.appendChild(tr);
+            };
+
+            const updateButtonStates = () => { savePdfButton.disabled = shotData.length === 0; };
+            
+            const renderTable = () => { renderHeader(); renderBody(); updateButtonStates(); };
+            
+            const addShotRow = () => { shotData.push(createInitialShot()); renderTable(); };
+
+            const deleteShotRow = (index) => {
+                if (shotData.length > 1) {
+                    shotData.splice(index, 1);
+                    resequenceShotIds();
+                    renderTable();
+                } else {
+                    alert("You can't delete the last shot row.");
+                }
+            };
+            
+            const openSelectionModal = (type, rowIndex) => {
+                activeRowIndex = rowIndex;
+                activeColumnKey = type;
+                const options = type === 'shotSize' ? shotSizeOptions : shotTypeOptions;
+                const title = type === 'shotSize' ? 'Select Shot Size' : 'Select Shot Type';
+                selectionModalTitle.textContent = title;
+                selectionModalContent.innerHTML = '';
+                for (const category in options) {
+                    const categoryDiv = document.createElement('div');
+                    categoryDiv.innerHTML = `<h4 class="font-semibold text-gray-800 border-b pb-1 mb-2">${category}</h4>`;
+                    const optionsGrid = document.createElement('div');
+                    optionsGrid.className = "grid grid-cols-2 md:grid-cols-3 gap-2";
+                    options[category].forEach(option => {
+                        const btn = document.createElement('button');
+                        btn.textContent = option;
+                        btn.className = "text-sm text-left p-2 border rounded-md hover:bg-blue-100 hover:border-blue-400 transition";
+                        btn.dataset.value = option;
+                        optionsGrid.appendChild(btn);
+                    });
+                    categoryDiv.appendChild(optionsGrid);
+                    selectionModalContent.appendChild(categoryDiv);
+                }
+                selectionModal.classList.remove('hidden');
+                selectionModal.classList.add('flex');
+            };
+
+            const closeSelectionModal = () => {
+                selectionModal.classList.add('hidden');
+                selectionModal.classList.remove('flex');
+                selectionModalCustomInput.value = '';
+                activeRowIndex = -1;
+                activeColumnKey = '';
+            };
+
+            const handleOptionSelect = (value) => {
+                if (activeRowIndex !== -1 && activeColumnKey) {
+                    shotData[activeRowIndex][activeColumnKey] = value;
+                    renderTable();
+                }
+                closeSelectionModal();
+            };
+
+            const openColumnsModal = () => {
+                columnsChecklist.innerHTML = '';
+                // Use visibleColumns to determine checked state, but show all options
+                const currentColumnOrder = [...visibleColumns];
+                Object.keys(allColumns).forEach(key => {
+                    const labelText = allColumns[key][0];
+                    const isChecked = currentColumnOrder.includes(key);
+                    columnsChecklist.innerHTML += `<label class="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-100 cursor-pointer"><input type="checkbox" data-key="${key}" class="form-checkbox h-5 w-5 text-blue-600 rounded" ${isChecked ? 'checked' : ''}><span class="text-gray-700">${labelText}</span></label>`;
+                });
+                columnsModal.classList.remove('hidden');
+                columnsModal.classList.add('flex');
+            };
+            
+            const closeColumnsModal = () => {
+                const checkedInputs = columnsChecklist.querySelectorAll('input:checked');
+                const newVisibleColumns = Array.from(checkedInputs).map(input => input.dataset.key);
+                // Preserve the order of existing columns, and add new ones to the end.
+                const oldVisibleColumns = visibleColumns.filter(key => newVisibleColumns.includes(key));
+                const newlyAddedColumns = newVisibleColumns.filter(key => !visibleColumns.includes(key));
+                visibleColumns = [...oldVisibleColumns, ...newlyAddedColumns];
+                
+                columnsModal.classList.add('hidden');
+                columnsModal.classList.remove('flex');
+                renderTable();
+            };
+            
+            const saveListToFile = () => {
+                const dataToSave = { shotData, visibleColumns };
+                const jsonString = JSON.stringify(dataToSave, null, 2);
+                const blob = new Blob([jsonString], {type: "application/json"});
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `shotlist-${new Date().toISOString().slice(0,10)}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            };
+
+            const loadListFromFile = (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const loadedData = JSON.parse(e.target.result);
+                        if (loadedData.shotData && loadedData.visibleColumns) {
+                            shotData = loadedData.shotData;
+                            visibleColumns = loadedData.visibleColumns;
+                            resequenceShotIds();
+                            renderTable();
+                        } else {
+                            alert('Invalid shot list file format.');
+                        }
+                    } catch (error) {
+                        console.error("Failed to parse JSON file:", error);
+                        alert('Could not load the file.');
+                    }
+                };
+                reader.readAsText(file);
+                event.target.value = null;
+            };
+
+            const saveAsPdf = async () => {
+                const table = document.getElementById('shot-list-table');
+                table.querySelectorAll('.no-print').forEach(el => el.style.visibility = 'hidden');
+                const inputs = table.querySelectorAll('input, textarea, button');
+                inputs.forEach(el => { el.style.border = 'none'; });
+                const canvas = await html2canvas(table, { scale: 2, useCORS: true });
+                table.querySelectorAll('.no-print').forEach(el => el.style.visibility = '');
+                inputs.forEach(el => { el.style.border = ''; });
+                const imgData = canvas.toDataURL('image/png');
+                const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+                const imgProps = doc.getImageProperties(imgData);
+                const pdfWidth = doc.internal.pageSize.getWidth() - 40;
+                const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                doc.addImage(imgData, 'PNG', 20, 20, pdfWidth, pdfHeight);
+                doc.save('shot-list.pdf');
+            };
+            
+            // --- EVENT LISTENERS ---
+            addShotButton.addEventListener('click', addShotRow);
+            savePdfButton.addEventListener('click', saveAsPdf);
+            saveJsonButton.addEventListener('click', saveListToFile);
+            loadJsonInput.addEventListener('change', loadListFromFile);
+            editColumnsButton.addEventListener('click', openColumnsModal);
+            columnsModalCloseButton.addEventListener('click', closeColumnsModal);
+            selectionModalCloseButton.addEventListener('click', closeSelectionModal);
+            selectionModalCustomButton.addEventListener('click', () => {
+                const customValue = selectionModalCustomInput.value.trim();
+                if (customValue) handleOptionSelect(customValue);
+            });
+            selectionModalContent.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON' && e.target.dataset.value) handleOptionSelect(e.target.dataset.value);
+            });
+            shotListBody.addEventListener('click', (e) => {
+                const button = e.target.closest('.cell-button');
+                const delButton = e.target.closest('.delete-shot-button');
+                if (button) { openSelectionModal(button.dataset.key, parseInt(button.dataset.index)); }
+                else if (delButton) { deleteShotRow(parseInt(delButton.closest('tr').dataset.index)); }
+            });
+            shotListBody.addEventListener('change', (e) => {
+                const input = e.target.closest('input, textarea');
+                if (!input) return;
+                const { index } = input.dataset;
+                if (input.classList.contains('status-checkbox')) {
+                    shotData[index].status = input.checked;
+                    renderTable();
+                } else if (input.type === 'file') {
+                    const file = input.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        shotData[index][input.dataset.key] = event.target.result;
+                        renderTable();
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    shotData[index][input.dataset.key] = input.value;
+                }
+            });
+
+            // --- ROW DRAG AND DROP LISTENERS ---
+            shotListBody.addEventListener('dragstart', e => {
+                const row = e.target.closest('tr');
+                if (!row) return;
+                // Make sure we're not dragging a header
+                if (e.target.closest('thead')) return;
+                draggedRowIndex = parseInt(row.dataset.index);
+                e.dataTransfer.effectAllowed = 'move';
+                setTimeout(() => row.classList.add('row-dragging'), 0);
+            });
+            shotListBody.addEventListener('dragover', e => {
+                e.preventDefault();
+                const row = e.target.closest('tr');
+                if (row && draggedRowIndex !== null && parseInt(row.dataset.index) !== draggedRowIndex) {
+                    shotListBody.querySelectorAll('.row-drag-over').forEach(el => el.classList.remove('row-drag-over'));
+                    row.classList.add('row-drag-over');
+                }
+            });
+            shotListBody.addEventListener('dragleave', e => e.target.closest('tr')?.classList.remove('row-drag-over'));
+            shotListBody.addEventListener('drop', e => {
+                e.preventDefault();
+                if (draggedRowIndex === null) return; // Dropping a row
+                const targetRow = e.target.closest('tr');
+                if (!targetRow) return;
+                targetRow.classList.remove('row-drag-over');
+                const targetIndex = parseInt(targetRow.dataset.index);
+                const [draggedItem] = shotData.splice(draggedRowIndex, 1);
+                shotData.splice(targetIndex, 0, draggedItem);
+                resequenceShotIds();
+                renderTable();
+            });
+            shotListBody.addEventListener('dragend', e => {
+                const row = e.target.closest('tr');
+                if(row) row.classList.remove('row-dragging');
+                draggedRowIndex = null;
+            });
+
+            // --- COLUMN DRAG AND DROP LISTENERS ---
+            shotListHeader.addEventListener('dragstart', e => {
+                const th = e.target.closest('th');
+                if (th && th.draggable) {
+                    draggedColumnKey = th.dataset.key;
+                    e.dataTransfer.effectAllowed = 'move';
+                    setTimeout(() => th.classList.add('col-dragging'), 0);
+                }
+            });
+            shotListHeader.addEventListener('dragover', e => {
+                e.preventDefault();
+                const th = e.target.closest('th');
+                if (th && th.draggable && th.dataset.key !== draggedColumnKey) {
+                    shotListHeader.querySelectorAll('.col-drag-over').forEach(el => el.classList.remove('col-drag-over'));
+                    th.classList.add('col-drag-over');
+                }
+            });
+            shotListHeader.addEventListener('dragleave', e => {
+                 e.target.closest('th')?.classList.remove('col-drag-over');
+            });
+            shotListHeader.addEventListener('drop', e => {
+                e.preventDefault();
+                 if (draggedColumnKey === null) return; // Dropping a column
+                const targetTh = e.target.closest('th');
+                if (!targetTh || !draggedColumnKey || !targetTh.draggable) return;
+                targetTh.classList.remove('col-drag-over');
+                const fromIndex = visibleColumns.indexOf(draggedColumnKey);
+                const toIndex = visibleColumns.indexOf(targetTh.dataset.key);
+                if (fromIndex !== -1 && toIndex !== -1) {
+                    const [item] = visibleColumns.splice(fromIndex, 1);
+                    visibleColumns.splice(toIndex, 0, item);
+                    renderTable();
+                }
+            });
+            shotListHeader.addEventListener('dragend', e => {
+                const th = e.target.closest('th');
+                if (th) th.classList.remove('col-dragging');
+                shotListHeader.querySelectorAll('.col-drag-over').forEach(el => el.classList.remove('col-drag-over'));
+                draggedColumnKey = null;
+            });
+            
+            // --- INITIALIZATION ---
+            renderTable();
+        });
+    </script>
+</body>
+</html>
