@@ -18,8 +18,11 @@
         .modal-bg { background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
         .glass-pane { background: rgba(255, 255, 255, 0.6); border-radius: 16px; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.3); }
         .logo-placeholder { display: inline-block; vertical-align: middle; width: 50px; height: 25px; }
-        .button-1 { font-weight: 500; font-size: 1.1rem; display: flex; justify-content: center; align-items: center; text-align: center; gap: 0.5rem; transition: all 0.2s ease-in-out; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.5); padding: 10px; flex-grow: 1; }
+        .button-1 { font-weight: 500; font-size: 1.1rem; display: flex; justify-content: center; align-items: center; text-align: center; gap: 0.5rem; transition: all 0.2s ease-in-out; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.5); padding: 10px; flex-grow: 1;  }
         .button-1:hover { background: rgba(255, 255, 255, 0.22); border-color: rgba(255, 255, 255, 0.3); transform: translateY(-2px); cursor: pointer; }
+      
+        .button-2 { background: rgba(255, 255, 255, 0.6); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); font-weight: 500; font-size: 1.1rem; display: flex; justify-content: end; text-align: center; transition: all 0.2s ease-in-out; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.5); padding: 12px; }
+        .button-2:hover { background: rgba(255, 255, 255, 0.22); border-color: rgba(255, 255, 255, 0.3); transform: translateY(-2px); cursor: pointer; }
         
         header {
         margin-top:1rem;
@@ -76,11 +79,12 @@
             <p id="page-subtitle" class="text-gray-600 mt-2">Design your film, shot by shot.</p>
         </header>
         <br>
-        <div class="glass-pane p-6 rounded-lg">
-            <div class="flex justify-between items-center mb-4 no-print">
-                 <button id="switch-view-button" class="bg-blue-500 text-white font-semibold px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 transition">Switch to Storyboard</button>
-                 <button id="edit-fields-button" class="bg-gray-200 text-gray-700 font-semibold px-4 py-2 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 transition">Edit Fields</button>
+            <div class="flex justify-end items-center mb-4 no-print">
+                                     <button id="switch-view-button" class="button-2  m-1">Switch to Storyboard</button>
+                                          <button id="edit-fields-button" class="button-2 m-1">Edit Fields</button>
             </div>
+        <div class="glass-pane p-6 rounded-lg">
+
             <div id="content-wrapper">
                 </div>
         </div>
@@ -90,8 +94,8 @@
         <div class="button-grid-wrapper">
             <div id="button-grid" class="button-grid">
                 <button id="add-shot-button" class="button-1 glass-pane">Add New Shot</button>
-                <button id="save-json-button" class="button-1 glass-pane">Save List (.json)</button>
-                <label class="button-1 glass-pane">Load List (.json)<input type="file" id="load-json-input" class="hidden" accept=".json,application/json"></label>
+                <button id="save-json-button" class="button-1 glass-pane">Save List</button>
+                <label class="button-1 glass-pane">Load List<input type="file" id="load-json-input" class="hidden" accept=".json,application/json"></label>
                 <button id="save-pdf-button" class="button-1 glass-pane">Save as PDF</button>
             </div>
             <button id="mobile-menu-button" class="mobile-menu-button button-1 glass-pane">Menu</button>
