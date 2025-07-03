@@ -18,17 +18,12 @@
         .modal-bg { background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
         .glass-pane { background: rgba(255, 255, 255, 0.6); border-radius: 16px; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.3); }
         .logo-placeholder { display: inline-block; vertical-align: middle; width: 50px; height: 25px; }
-        .button-1 { font-weight: 500; font-size: 1.1rem; display: flex; justify-content: center; align-items: center; text-align: center; gap: 0.5rem; transition: all 0.2s ease-in-out; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.5); padding: 10px; flex-grow: 1;  }
+        .button-1 { font-weight: 500; font-size: 1.1rem; display: flex; justify-content: center; align-items: center; text-align: center; gap: 0.5rem; transition: all 0.2s ease-in-out; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.5); padding: 10px; flex-grow: 1; }
         .button-1:hover { background: rgba(255, 255, 255, 0.22); border-color: rgba(255, 255, 255, 0.3); transform: translateY(-2px); cursor: pointer; }
-      
-        .button-2 { background: rgba(255, 255, 255, 0.6); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); font-weight: 500; font-size: 1.1rem; display: flex; justify-content: end; text-align: center; transition: all 0.2s ease-in-out; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.5); padding: 12px; }
+        .button-2 { white-space: nowrap; background: rgba(255, 255, 255, 0.6); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); font-weight: 500; font-size: 1rem; display: inline-flex; justify-content: center; text-align: center; transition: all 0.2s ease-in-out; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.5); padding: 10px 18px; }
         .button-2:hover { background: rgba(255, 255, 255, 0.22); border-color: rgba(255, 255, 255, 0.3); transform: translateY(-2px); cursor: pointer; }
         
-        header {
-        margin-top:1rem;
-        }
-        
-        .main-container { width: 100%; max-width: none; }
+        .main-container { width: 100%; max-width: none; margin-top: 2rem;}
         .table-container, .storyboard-view { padding: 2px; }
         .shot-list-view { display: table; width: 100%; border-collapse: collapse; }
         .shot-list-view .shot-item { display: table-row; cursor: grab; }
@@ -66,25 +61,33 @@
             .button-grid { display: none; flex-direction: column; position: absolute; bottom: calc(var(--bottom-bar-height) - 1.5rem); left: 1rem; right: 1rem; padding: 1rem; border-radius: 12px; }
             .button-grid.menu-open { display: flex; }
             .mobile-menu-button { display: flex; width: 100%; font-size: 1.2rem; }
+            .w-full {flex-direction: column; width: 90vw!important; align-items: center!important;} 
         }
         #cropper-modal img { display: block; max-width: 100%; }
+        #document-title-input { transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out; }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
 
     <div class="main-container">
-        <header class="text-center mb-4">
+        <header class="text-center">
             <div class="logo-placeholder inline-block"><img src="https://harrysteel.co.uk/Harry%20Logo%20V4.png" alt="Harry Steel Logo" class="h-full"></div>
             <h1 class="text-4xl font-bold text-gray-900 mt-2">Harry's Creator Tool</h1>
             <p id="page-subtitle" class="text-gray-600 mt-2">Design your film, shot by shot.</p>
         </header>
-        <br>
-            <div class="flex justify-end items-center mb-4 no-print">
-                                     <button id="switch-view-button" class="button-2  m-1">Switch to Storyboard</button>
-                                          <button id="edit-fields-button" class="button-2 m-1">Edit Fields</button>
+        
+        <div class="w-full max-w-100vw mx-auto my-4 flex justify-between items-end gap-8 no-print">
+            <div class="flex-grow">
+                <label for="document-title-input" class="block text-sm font-medium text-gray-800 mb-1">Document Title</label>
+                <input type="text" id="document-title-input" class="block w-full px-3 py-2 bg-white/80 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-lg" placeholder="Project Name">
             </div>
-        <div class="glass-pane p-6 rounded-lg">
+            <div class="flex-shrink-0 flex gap-4">
+                 <button id="switch-view-button" class="button-2">Switch to Storyboard</button>
+                 <button id="edit-fields-button" class="button-2">Edit Fields</button>
+            </div>
+        </div>
 
+        <div class="glass-pane p-6 rounded-lg">
             <div id="content-wrapper">
                 </div>
         </div>
@@ -121,6 +124,7 @@
             const savePdfButton = document.getElementById('save-pdf-button');
             const mobileMenuButton = document.getElementById('mobile-menu-button');
             const buttonGrid = document.getElementById('button-grid');
+            const documentTitleInput = document.getElementById('document-title-input');
             const cropperModal = document.getElementById('cropper-modal');
             const cropperImage = document.getElementById('cropper-image');
             const cropperSaveButton = document.getElementById('cropper-save-button');
@@ -139,10 +143,11 @@
             let currentView = 'shot-list';
             let cropper = null;
             let editingShotIndex = null;
+            
             const allColumns = {
                 image: ['Image', true], description: ['Description', true], scene: ['Scene', false],
                 subject: ['Subject', false], vfx: ['VFX', false], camera: ['Camera', false],
-                shotSize: ['Shot Size', true], shotType: ['Shot Type', true], movement: ['Movement', false],
+                shotSize: ['Shot Size', false], shotType: ['Shot Type', false], movement: ['Movement', false],
                 equipment: ['Equipment', false], lens: ['Lens', false], frameRate: ['Frame Rate', false],
             };
             let visibleColumns = Object.keys(allColumns).filter(key => allColumns[key][1]);
@@ -236,7 +241,7 @@
             }
 
             function updateUIText() {
-                pageSubtitle.textContent = currentView === 'shot-list' ? 'Design your film, shot by shot.' : 'Design your film, shot by shot.';
+                pageSubtitle.textContent = "Design your film, shot by shot.";
                 switchViewButton.textContent = currentView === 'shot-list' ? 'Switch to Storyboard' : 'Switch to Shot List';
                 editFieldsButton.textContent = 'Edit Fields';
             }
@@ -244,7 +249,20 @@
             function openCropper(imageSrc, index) { editingShotIndex = index; cropperImage.src = imageSrc; cropperModal.classList.remove('hidden'); cropperModal.classList.add('flex'); if (cropper) cropper.destroy(); cropper = new Cropper(cropperImage, { aspectRatio: 16 / 9, viewMode: 2, background: false }); }
             function closeCropper() { if (cropper) cropper.destroy(); cropper = null; editingShotIndex = null; cropperImage.src = ''; cropperModal.classList.add('hidden'); cropperModal.classList.remove('flex'); }
             
+            function validateTitle() {
+                const title = documentTitleInput.value.trim();
+                if (!title) {
+                    documentTitleInput.classList.add('border-red-500', 'ring', 'ring-red-500'); documentTitleInput.focus();
+                    alert("Please enter a document title before saving."); return null;
+                }
+                documentTitleInput.classList.remove('border-red-500', 'ring', 'ring-red-500');
+                return title;
+            }
+
             async function saveAsPdf() {
+                const title = validateTitle();
+                if (!title) return;
+
                 savePdfButton.textContent = "Generating..."; savePdfButton.disabled = true;
                 const printStyle = document.createElement('style');
                 printStyle.innerHTML = `
@@ -256,10 +274,6 @@
                 await new Promise(resolve => setTimeout(resolve, 100));
 
                 try {
-                    const defaultTitle = `${currentView.charAt(0).toUpperCase() + currentView.slice(1)} - ${new Date().toLocaleDateString()}`;
-                    const title = prompt("Please enter a title for your document:", defaultTitle);
-                    if (!title) return;
-
                     const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
                     const toDataURL = url => fetch(url).then(r=>r.blob()).then(b=>new Promise((res,rej)=>{const r=new FileReader();r.onloadend=()=>res(r.result);r.onerror=rej;r.readAsDataURL(b)}));
                     let logoDataURL; try { logoDataURL = await toDataURL('https://harrysteel.co.uk/Harry%20Logo%20V4.png'); } catch (e) { console.error(e); }
@@ -277,10 +291,11 @@
                         const contentClone = contentWrapper.cloneNode(true); 
                         contentClone.querySelectorAll('textarea, input[type="text"]').forEach(input => {
                             const cell = input.parentElement;
-                            cell.innerHTML = `<div>${input.value.replace(/\n/g, '<br/>')}</div>`;
+                            cell.style.verticalAlign = 'top';
+                            cell.innerHTML = `<div style="white-space: pre-wrap;">${input.value.replace(/\n/g, '<br/>')}</div>`;
                         });
                         document.body.appendChild(contentClone);
-                        const tableClone = contentClone.querySelector('#shot-list-table'); 
+                        const tableClone = contentClone.querySelector('#shot-list-table');
                         tableClone.style.width = '1200px'; 
                         const headerCanvas = await html2canvas(tableClone.querySelector('thead'), { scale: 2 });
                         const contentWidth = pageWidth - 2 * margin;
@@ -347,14 +362,15 @@
             function resequenceShotIds() { shotData.forEach((shot, index) => { shot.id = index + 1; }); nextShotId = shotData.length + 1; }
             function openColumnsModal() { columnsChecklist.innerHTML = ''; const currentColumnOrder = [...visibleColumns]; Object.keys(allColumns).forEach(key => { const labelText = allColumns[key][0]; const isChecked = currentColumnOrder.includes(key); columnsChecklist.innerHTML += `<label class="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-100 cursor-pointer"><input type="checkbox" data-key="${key}" class="form-checkbox h-5 w-5 text-blue-600 rounded" ${isChecked ? 'checked' : ''}><span class="text-gray-700">${labelText}</span></label>`; }); columnsModal.classList.remove('hidden'); columnsModal.classList.add('flex'); }
             function closeColumnsModal() { const checkedInputs = columnsChecklist.querySelectorAll('input:checked'); const newVisibleColumns = Array.from(checkedInputs).map(input => input.dataset.key); const oldVisibleColumns = visibleColumns.filter(key => newVisibleColumns.includes(key)); const newlyAddedColumns = newVisibleColumns.filter(key => !visibleColumns.includes(key)); visibleColumns = [...oldVisibleColumns, ...newlyAddedColumns]; columnsModal.classList.add('hidden'); columnsModal.classList.remove('flex'); renderContent(); }
-            function saveListToFile() { const dataToSave = { shotData, visibleColumns, currentView }; const jsonString = JSON.stringify(dataToSave, null, 2); const blob = new Blob([jsonString], {type: "application/json"}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.download = `shotlist-${new Date().toISOString().slice(0,10)}.json`; a.href = url; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); }
-            function loadListFromFile(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (e) => { try { const loadedData = JSON.parse(e.target.result); if (loadedData.shotData) { shotData = loadedData.shotData; if(loadedData.visibleColumns) visibleColumns = loadedData.visibleColumns; if(loadedData.currentView) currentView = loadedData.currentView; resequenceShotIds(); renderContent(); } else { alert('Invalid file format.'); } } catch (error) { console.error("Failed to parse JSON file:", error); alert('Could not load the file.'); } }; reader.readAsText(file); event.target.value = null; }
+            function saveListToFile() { const title = validateTitle(); if(!title) return; const dataToSave = { documentTitle: title, shotData, visibleColumns, currentView }; const jsonString = JSON.stringify(dataToSave, null, 2); const blob = new Blob([jsonString], {type: "application/json"}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); const safeFilename = title.replace(/[^a-z0-9\s-]/gi, '').replace(/\s+/g, '-').toLowerCase(); a.download = `${safeFilename || 'shotlist'}.json`; a.href = url; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); }
+            function loadListFromFile(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (e) => { try { const loadedData = JSON.parse(e.target.result); if (loadedData.shotData) { shotData = loadedData.shotData; if(loadedData.visibleColumns) visibleColumns = loadedData.visibleColumns; if(loadedData.currentView) currentView = loadedData.currentView; if(loadedData.documentTitle) documentTitleInput.value = loadedData.documentTitle; resequenceShotIds(); renderContent(); } else { alert('Invalid file format.'); } } catch (error) { console.error("Failed to parse JSON file:", error); alert('Could not load the file.'); } }; reader.readAsText(file); event.target.value = null; }
             
             function initialize() {
                 attachEventListeners();
                 if (shotData.length === 0) { addShotRow(); } 
                 else { renderContent(); }
             }
+            
             initialize();
         });
     </script>
