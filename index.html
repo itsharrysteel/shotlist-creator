@@ -27,7 +27,7 @@
         .shot-list-view th.col-drag-over { border-right: 3px solid #3b82f6; }
 
         .storyboard-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; }
-        .storyboard-view .shot-item { display: flex; flex-direction: column; background: rgba(255, 255, 255, 0.7); border: 1px solid rgba(255, 255, 255, 0.4); border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow: hidden; position: relative; cursor: grab; }
+        .storyboard-view .shot-item { display: flex; flex-direction: column; background: rgba(255, 255, 255, 0.7); border: 1px solid #E8E8E8; border-radius: 12px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); overflow: hidden; position: relative; cursor: grab; }
         .storyboard-view .image-preview-container { width: 100%; height: auto; aspect-ratio: 16 / 9; background-color: #e2e8f0; cursor: pointer; overflow: hidden; }
         .storyboard-view .image-preview { width: 100%; height: 100%; object-fit: cover; }
         .storyboard-view .shot-item-content { padding: 1rem; flex-grow: 1; display: flex; flex-direction: column; gap: 0.75rem; }
@@ -67,11 +67,11 @@
             <h1>Harry's Creator Tool</h1>
             <p id="page-subtitle">Design your film, shot by shot.</p>
         </header>
-        
+        <div class="content-bg">
         <div class="w-full max-w-100vw mx-auto my-4 flex justify-between items-end gap-8 no-print">
             <div class="flex-grow">
-                <label for="document-title-input" class="block text-sm font-medium text-gray-800 mb-1">Document Title</label>
-                <input type="text" id="document-title-input" class="" placeholder="Project Name">
+                <label for="document-title-input" style="font-weight:600">Document Title</label>
+                <input type="text" id="document-title-input" class="" placeholder="Project Name" style="margin-top:0.5rem">
             </div>
             <div class="flex-shrink-0 flex gap-4">
                  <button id="switch-view-button" class="btn">Switch to Storyboard</button>
@@ -79,7 +79,7 @@
             </div>
         </div>
 
-        <div class="content-bg p-6 rounded-lg">
+        <div class="rounded-lg" style="margin-top:2rem">
             <div id="content-wrapper">
                 </div>
         </div>
@@ -95,6 +95,7 @@
             </div>
             <button id="mobile-menu-button" class="mobile-menu-button btn">Menu</button>
         </div>
+    </div>
     </div>
 
     <div id="columns-modal" class="fixed inset-0 z-50 items-center justify-center hidden content-bg"> <div class="rounded-lg shadow-xl m-4 sm:m-8 max-w-xl w-full max-h-[90vh] overflow-y-auto"> <div class="p-6"> <h3 class="text-2xl font-semibold mb-4">Edit Display Fields</h3> <p class="text-sm text-gray-600 mb-6">Select which fields you want to display.</p> <div id="columns-checklist" class="grid grid-cols-2 sm:grid-cols-3 gap-4"></div> </div> <div class="bg-gray-50/50 px-6 py-3 flex justify-end rounded-b-lg"><button id="columns-modal-close-button" class="bg-blue-600 text-white font-semibold px-5 py-2 rounded-md hover:bg-blue-700">Done</button></div> </div> </div>
