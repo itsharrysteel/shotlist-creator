@@ -4,14 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" type="image/x-icon" href="./favicon.ico">
-    <title>Harry's Shot List & Storyboard Creator</title>
+    <title>Harry Steel</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 	<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://directory.hsteel.uk/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+    <script src="https://directory.hsteel.uk/header.js"></script>
+    	<link rel="stylesheet" href="https://directory.hsteel.uk/header.css">
     <style>
         :root { --bottom-bar-height: 90px; }
         
@@ -60,15 +64,10 @@
     </style>
 </head>
 <body>
-
-    <div class="main-container">
-        <header class="text-center">
-            <div class="logo-placeholder inline-block"><img src="https://harrysteel.co.uk/Harry%20Logo%20V4.png" alt="Harry Steel Logo" class="h-full"></div>
-            <h1>Harry's Creator Tool</h1>
-            <p id="page-subtitle">Design your film, shot by shot.</p>
-        </header>
+<h2 class="headingtext h1-v2">Storyboard & Shot List Creator</h2>
+    <div class="main-container" style="margin-bottom:10vh;">
         <div class="content-bg">
-        <div class="w-full max-w-100vw mx-auto my-4 flex justify-between items-end gap-8 no-print">
+        <div class="max-w-100vw mx-auto my-4 flex justify-between items-end gap-8 no-print">
             <div class="flex-grow">
                 <label for="document-title-input" style="font-weight:600">Document Title</label>
                 <input type="text" id="document-title-input" class="" placeholder="Project Name" style="margin-top:0.5rem">
@@ -85,7 +84,7 @@
         </div>
     </div>
 
-    <div class="fixed-bottom-bar no-print glass-pane">
+    <div class="fixed-bottom-bar no-print content-bg" style="padding:0px;">
         <div class="button-grid-wrapper">
             <div id="button-grid" class="button-grid">
                 <button id="add-shot-button" class="btn">Add New Shot</button>
