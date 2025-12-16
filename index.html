@@ -4,112 +4,349 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" type="image/x-icon" href="./favicon.ico">
-    <title>Harry Steel</title>
+    <title>Shot List Creator | Harry Steel</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-	<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
-	<link href="https://fonts.googleapis.com/css2?family=Cal+Sans&display=swap" rel="stylesheet">
-    <script src="https://directory.hsteel.uk/header.js"></script>
-    	<link rel="stylesheet" href="https://directory.hsteel.uk/header.css">
-    <style>
-        :root { --bottom-bar-height: 90px; }
-        
-        .main-container { width: 100%; max-width: none; margin-top: 2rem;}
-        .table-container, .storyboard-view { padding: 2px; }
-        .shot-list-view { display: table; width: 100%; border-collapse: collapse; }
-        .shot-list-view .shot-item { display: table-row; cursor: grab; }
-        .shot-list-view th, .shot-list-view td { padding: 8px 12px; border: 1px solid #e2e8f0; vertical-align: middle; }
-        .shot-list-view th { background-color: #f8fafc; }
-        .shot-list-view .image-preview { display: block; max-width: 120px; max-height: 67.5px; object-fit: cover; border-radius: 4px; }
-        .shot-list-view th[draggable] { cursor: grab; }
-        .shot-list-view th.col-dragging { background-color: #e0e7ff; opacity: 0.7; }
-        .shot-list-view th.col-drag-over { border-right: 3px solid #3b82f6; }
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
 
-        .storyboard-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; }
-        .storyboard-view .shot-item { display: flex; flex-direction: column; background: rgba(255, 255, 255, 0.7); border: 1px solid #E8E8E8; border-radius: 12px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); overflow: hidden; position: relative; cursor: grab; }
-        .storyboard-view .image-preview-container { width: 100%; height: auto; aspect-ratio: 16 / 9; background-color: #e2e8f0; cursor: pointer; overflow: hidden; }
-        .storyboard-view .image-preview { width: 100%; height: 100%; object-fit: cover; }
-        .storyboard-view .shot-item-content { padding: 1rem; flex-grow: 1; display: flex; flex-direction: column; gap: 0.75rem; }
-        .storyboard-view .shot-title { font-size: 1.25rem; font-weight: 600; }
-        .storyboard-view .editable-field { cursor: pointer; padding: 4px; margin: -4px; border-radius: 4px; transition: background-color 0.2s; word-break: break-word; }
-        .storyboard-view .editable-field:hover { background-color: rgba(0,0,0,0.05); }
-        .storyboard-view .actions { position: absolute; top: 8px; right: 8px; display: flex; gap: 4px; z-index: 1; }
-        .storyboard-view .delete-shot-button { background: rgba(255,255,255,0.7); backdrop-filter: blur(5px); border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; color: #ef4444; border: none; font-size: 1.5rem; line-height: 1; cursor: pointer; }
+    <style>
+        /* --- 1. BRAND VARIABLES --- */
+        :root {
+            --deep-forest: #1A3C34;
+            --oatmeal: #F3F0E7;
+            --walnut: #3E3B39;
+            --spiced-ochre: #C7943E;
+            --grid-line: rgba(26, 60, 52, 0.15);
+            --paper-white: #ffffff;
+            --bottom-bar-height: 80px;
+        }
+
+        /* --- 2. BASE STYLES --- */
+        body {
+            background-color: var(--oatmeal);
+            color: var(--walnut);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+        }
+
+        /* --- 3. NAVIGATION --- */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--grid-line);
+            background: var(--oatmeal);
+        }
+        .logo-img { height: 32px; width: auto; display: block; }
+        .nav-links { display: flex; gap: 2rem; }
+        .nav-item {
+            font-family: 'Source Serif 4', serif;
+            font-size: 1.1rem;
+            font-weight: 400;
+            color: var(--walnut);
+            text-decoration: none;
+            position: relative;
+            transition: color 0.2s ease;
+        }
+        .nav-item:hover { color: var(--spiced-ochre); }
+        .nav-item.active { color: var(--deep-forest); }
+        .nav-item.active::after {
+            content: ''; position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%);
+            width: 4px; height: 4px; background-color: var(--deep-forest); border-radius: 50%;
+        }
+
+        /* --- 4. APP LAYOUT --- */
+        .main-container {
+            width: 100%;
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            margin-bottom: calc(var(--bottom-bar-height) + 2rem);
+        }
+
+        /* --- 5. UI ELEMENTS --- */
+        #document-title-input {
+            font-family: 'Source Serif 4', serif;
+            font-size: 2.5rem;
+            font-weight: 300;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid var(--grid-line);
+            color: var(--deep-forest);
+            width: 100%;
+            padding: 0.5rem 0;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        #document-title-input:focus { border-bottom-color: var(--spiced-ochre); }
+        #document-title-input::placeholder { color: var(--walnut); opacity: 0.3; font-style: italic; }
+
+        .btn {
+            background-color: var(--deep-forest);
+            color: var(--oatmeal);
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px; 
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn:hover { background-color: var(--walnut); }
         
-        .shot-item.row-dragging { opacity: 0.4; transform: scale(1.02); box-shadow: 0 10px 25px rgba(0,0,0,0.2); cursor: grabbing; }
-        .shot-completed { background-color: #f0fdf4 !important; }
-        .shot-completed td, .storyboard-view .shot-completed { text-decoration: line-through; color: #6b7280; }
-        .storyboard-view .shot-completed .image-preview { filter: grayscale(80%); }
-        textarea { resize: vertical; min-width: 250px; min-height: 80px; width: 100%; }
+        #switch-view-button, #edit-fields-button {
+            background-color: transparent; color: var(--deep-forest); border: 1px solid var(--deep-forest);
+        }
+        #switch-view-button:hover, #edit-fields-button:hover {
+            background-color: var(--deep-forest); color: var(--oatmeal);
+        }
+
+        /* --- 6. SHOT LIST (WORKSHOP STYLE) --- */
+        .table-container {
+            background: var(--paper-white);
+            border: 1px solid var(--deep-forest);
+            border-radius: 4px;
+            box-shadow: 4px 4px 0px rgba(26, 60, 52, 0.1);
+            overflow-x: auto;
+        }
+        .shot-list-view { width: 100%; border-collapse: collapse; }
         
-        .fixed-bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; }
-        .button-grid-wrapper { max-width: 1400px; margin-inline: auto; padding: 1rem 2rem; }
-        .button-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+        /* Headers */
+        .shot-list-view th {
+            background-color: rgba(26, 60, 52, 0.05);
+            color: var(--deep-forest);
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--deep-forest);
+        }
+        
+        /* Rows */
+        .shot-list-view td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--grid-line);
+            font-family: 'Source Serif 4', serif;
+            font-weight: 300;
+            font-size: 1.05rem;
+            color: var(--walnut);
+            vertical-align: middle;
+        }
+        
+        .shot-list-view input[type="text"], .shot-list-view textarea {
+            background: transparent; border: none; border-bottom: 1px dashed var(--grid-line);
+            font-family: 'Source Serif 4', serif; font-size: 1rem; color: var(--walnut); width: 100%; padding: 4px;
+        }
+        .shot-list-view input:focus, .shot-list-view textarea:focus {
+            outline: none; border-bottom: 1px solid var(--spiced-ochre); background: rgba(243, 240, 231, 0.5);
+        }
+
+        .shot-list-view .image-preview {
+            width: 120px; height: auto; aspect-ratio: 16/9; object-fit: cover;
+            border: 1px solid var(--grid-line); border-radius: 2px; display: block;
+        }
+
+        /* --- 7. STORYBOARD (WORKSHOP CARD REPLICA - FULL BLEED IMAGE) --- */
+        .storyboard-view { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
+            gap: 2rem; 
+        }
+        
+        .storyboard-view .shot-item {
+            background-color: #fff;
+            border: 1px solid var(--deep-forest);
+            border-radius: 4px;
+            /* FIXED: Removed padding from parent so image hits edges */
+            padding: 0; 
+            display: flex;
+            flex-direction: column;
+            transition: all 0.2s ease;
+            box-shadow: 4px 4px 0px rgba(26, 60, 52, 0.1);
+            position: relative;
+            cursor: grab;
+            overflow: hidden; /* Ensures image respects border radius */
+        }
+        
+        .storyboard-view .shot-item:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 6px 6px 0px var(--deep-forest); 
+            z-index: 10;
+        }
+
+        .storyboard-view .shot-item::before { display: none; }
+
+        .storyboard-view .image-preview-container {
+            width: 100%; aspect-ratio: 16 / 9;
+            background-color: #eee; overflow: hidden; position: relative;
+            /* FIXED: Removed margin and border-radius here */
+            border-bottom: 1px solid var(--grid-line);
+        }
+        .storyboard-view .image-preview-container img {
+            width: 100%; height: 100%; object-fit: cover;
+        }
+        
+        /* FIXED: Re-applied padding to the content block only */
+        .storyboard-view .shot-item-content {
+            padding: 1.5rem;
+        }
+        
+        .storyboard-view .shot-title {
+            font-family: 'Source Serif 4', serif;
+            font-weight: 400;
+            font-size: 1.5rem;
+            color: var(--deep-forest);
+            margin-bottom: 0.5rem;
+            line-height: 1.2;
+        }
+        
+        .shot-details strong {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--walnut);
+            opacity: 0.6;
+            font-weight: 700;
+        }
+
+        .shot-details, .description {
+            font-family: 'Source Serif 4', serif;
+            font-size: 1rem;
+            color: var(--walnut);
+            border-bottom: 1px solid transparent; 
+            transition: border-color 0.2s;
+            cursor: text;
+        }
+        
+        .shot-details:hover, .description:hover {
+            background-color: rgba(0,0,0,0.02);
+        }
+
+        .editing-input {
+            width: 100%;
+            font-family: 'Source Serif 4', serif;
+            font-size: 1rem;
+            background: transparent;
+            border: none;
+            border-bottom: 1px dashed var(--deep-forest);
+            color: var(--deep-forest);
+            outline: none;
+            padding: 0;
+        }
+
+        /* --- 8. BOTTOM TOOLBAR --- */
+        .fixed-bottom-bar {
+            position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+            background: var(--oatmeal); border-top: 1px solid var(--grid-line);
+            padding: 1rem 0; box-shadow: 0 -10px 40px rgba(0,0,0,0.05);
+        }
+        .button-grid-wrapper { max-width: 1400px; margin: 0 auto; padding: 0 2rem; }
+        .button-grid { display: flex; gap: 1rem; justify-content: center; }
+
+        /* --- 9. MODALS --- */
+        .glass-pane { background: var(--oatmeal); border: 1px solid var(--deep-forest); }
+        .hidden { display: none !important; }
+        .shot-completed { opacity: 0.5; filter: grayscale(100%); transition: opacity 0.3s; }
+        .row-dragging { opacity: 0.5; border: 2px dashed var(--spiced-ochre); }
+        .col-drag-over { border-right: 4px solid var(--spiced-ochre) !important; }
         .mobile-menu-button { display: none; }
         @media (max-width: 768px) {
-            body { padding: 1rem 1rem calc(var(--bottom-bar-height) + 1rem); }
-            .button-grid-wrapper { padding: 1rem; }
-            .button-grid { display: none; flex-direction: column; position: absolute; bottom: calc(var(--bottom-bar-height) - 1.5rem); left: 1rem; right: 1rem; padding: 1rem; border-radius: 12px; }
+            .nav-links { display: none; }
+            .button-grid { display: none; flex-direction: column; background: var(--oatmeal); border: 1px solid var(--deep-forest); padding: 1rem; position: absolute; bottom: 80px; left: 1rem; right: 1rem; }
             .button-grid.menu-open { display: flex; }
-            .mobile-menu-button { display: flex; width: 100%; font-size: 1.2rem; }
-            .w-full {flex-direction: column; width: 90vw!important; align-items: center!important;} 
+            .mobile-menu-button { display: block; width: 100%; }
         }
-        #cropper-modal img { display: block; max-width: 100%; }
-        #document-title-input { transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out; }
     </style>
 </head>
 <body>
-<h2 class="headingtext h1-v2">Storyboard & Shot List Creator</h2>
-    <div class="main-container" style="margin-bottom:10vh;">
-        <div class="content-bg">
-        <div class="max-w-100vw mx-auto my-4 flex justify-between items-end gap-8 no-print">
-            <div class="flex-grow">
-                <label for="document-title-input" style="font-weight:600">Document Title</label>
-                <input type="text" id="document-title-input" class="" placeholder="Project Name" style="margin-top:0.5rem">
+
+    <nav class="no-print">
+        <a href="index.html">
+            <img src="https://harrysteel.co.uk/Logo.svg" alt="Harry Steel" class="logo-img">
+        </a>
+        <div class="nav-links">
+            <a href="index.html" class="nav-item">Work</a>
+            <a href="workshop.html" class="nav-item active">Workshop</a>
+            <a href="about.html" class="nav-item">About</a>
+            <a href="mailto:hello@harrysteel.co.uk" class="nav-item">Contact</a>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <div class="max-w-100vw mx-auto my-8 flex flex-col md:flex-row justify-between items-end gap-8 no-print">
+            <div class="flex-grow w-full md:w-auto">
+                <input type="text" id="document-title-input" placeholder="Untitled Project">
             </div>
             <div class="flex-shrink-0 flex gap-4">
-                 <button id="switch-view-button" class="btn">Switch to Storyboard</button>
-                 <button id="edit-fields-button" class="btn">Edit Fields</button>
+                 <button id="switch-view-button" class="btn">View: Storyboard</button>
+                 <button id="edit-fields-button" class="btn">Columns</button>
             </div>
         </div>
 
-        <div class="rounded-lg" style="margin-top:2rem">
-            <div id="content-wrapper">
-                </div>
-        </div>
+        <div id="content-wrapper"></div>
     </div>
 
-    <div class="fixed-bottom-bar no-print content-bg" style="padding:0px;">
+    <div class="fixed-bottom-bar no-print">
         <div class="button-grid-wrapper">
             <div id="button-grid" class="button-grid">
-                <button id="add-shot-button" class="btn">Add New Shot</button>
-                <button id="save-json-button" class="btn">Save List</button>
-                <label class="btn">Load List<input type="file" id="load-json-input" class="hidden" accept=".json,application/json"></label>
-                <button id="save-pdf-button" class="btn">Save as PDF</button>
+                <button id="add-shot-button" class="btn" style="background-color: var(--spiced-ochre);">+ Add Shot</button>
+                <div style="width: 1px; background: var(--deep-forest); opacity: 0.2; margin: 0 1rem;"></div>
+                <button id="save-json-button" class="btn">Save File</button>
+                <label class="btn" style="cursor: pointer;">Load File<input type="file" id="load-json-input" class="hidden" accept=".json,application/json"></label>
+                <button id="save-pdf-button" class="btn">Export PDF</button>
             </div>
-            <button id="mobile-menu-button" class="mobile-menu-button btn">Menu</button>
+            <button id="mobile-menu-button" class="mobile-menu-button btn">Actions Menu</button>
         </div>
     </div>
+
+    <div id="columns-modal" class="fixed inset-0 z-50 items-center justify-center hidden" style="background: rgba(26,60,52,0.8); backdrop-filter: blur(4px);"> 
+        <div class="bg-[#F3F0E7] border border-[#1A3C34] shadow-2xl m-4 p-6 max-w-xl w-full max-h-[90vh] overflow-y-auto rounded-sm"> 
+            <h3 class="text-2xl mb-4" style="font-family: 'Source Serif 4', serif; color: var(--deep-forest);">Visible Columns</h3> 
+            <div id="columns-checklist" class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6"></div> 
+            <div class="flex justify-end">
+                <button id="columns-modal-close-button" class="btn">Done</button>
+            </div> 
+        </div> 
     </div>
 
-    <div id="columns-modal" class="fixed inset-0 z-50 items-center justify-center hidden content-bg"> <div class="rounded-lg shadow-xl m-4 sm:m-8 max-w-xl w-full max-h-[90vh] overflow-y-auto"> <div class="p-6"> <h3 class="text-2xl font-semibold mb-4">Edit Display Fields</h3> <p class="text-sm text-gray-600 mb-6">Select which fields you want to display.</p> <div id="columns-checklist" class="grid grid-cols-2 sm:grid-cols-3 gap-4"></div> </div> <div class="bg-gray-50/50 px-6 py-3 flex justify-end rounded-b-lg"><button id="columns-modal-close-button" class="bg-blue-600 text-white font-semibold px-5 py-2 rounded-md hover:bg-blue-700">Done</button></div> </div> </div>
-    <div id="cropper-modal" class="fixed inset-0 z-50 items-center justify-center hidden content-bg"> <div class="glass-pane rounded-lg shadow-xl m-4 sm:m-8 max-w-4xl w-full"> <div class="p-6"> <h3 class="text-2xl font-semibold mb-4">Crop Image (16:9)</h3> <div class="h-[60vh] bg-gray-800/50"> <img id="cropper-image" src=""> </div> </div> <div class="bg-gray-50/50 px-6 py-4 flex justify-end gap-4 rounded-b-lg"> <button id="cropper-cancel-button" class="bg-gray-300 text-gray-800 font-semibold px-5 py-2 rounded-md hover:bg-gray-400">Cancel</button> <button id="cropper-save-button" class="bg-blue-600 text-white font-semibold px-5 py-2 rounded-md hover:bg-blue-700">Save Crop</button> </div> </div> </div>
+    <div id="cropper-modal" class="fixed inset-0 z-50 items-center justify-center hidden" style="background: rgba(26,60,52,0.9);"> 
+        <div class="bg-[#F3F0E7] shadow-xl m-4 max-w-4xl w-full rounded-sm overflow-hidden"> 
+            <div class="p-6"> 
+                <h3 class="text-2xl mb-4" style="font-family: 'Source Serif 4', serif;">Crop Image (16:9)</h3> 
+                <div class="h-[60vh] bg-black/10"> <img id="cropper-image" src="" style="display:block; max-width: 100%;"> </div> 
+            </div> 
+            <div class="bg-black/5 px-6 py-4 flex justify-end gap-4"> 
+                <button id="cropper-cancel-button" class="btn" style="background: transparent; color: var(--walnut); border: 1px solid var(--walnut);">Cancel</button> 
+                <button id="cropper-save-button" class="btn">Confirm Crop</button> 
+            </div> 
+        </div> 
+    </div>
     
     <input type="file" id="image-upload-input" class="hidden" accept="image/*">
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // --- DOM ELEMENTS ---
             const contentWrapper = document.getElementById('content-wrapper');
             const switchViewButton = document.getElementById('switch-view-button');
             const editFieldsButton = document.getElementById('edit-fields-button');
-            const pageSubtitle = document.getElementById('page-subtitle');
             const imageUploadInput = document.getElementById('image-upload-input');
             const addShotButton = document.getElementById('add-shot-button');
             const saveJsonButton = document.getElementById('save-json-button');
@@ -128,7 +365,6 @@
 
             const { jsPDF } = window.jspdf;
 
-            // --- STATE & DATA ---
             let shotData = [];
             let nextShotId = 1;
             let draggedItemIndex = null;
@@ -145,8 +381,7 @@
             };
             let visibleColumns = Object.keys(allColumns).filter(key => allColumns[key][1]);
 
-            // --- RENDER FUNCTIONS ---
-            
+            // --- RENDER CONTENT ---
             function renderContent() {
                 contentWrapper.innerHTML = ''; 
                 if (currentView === 'shot-list') {
@@ -165,7 +400,7 @@
             
             function renderShotListHeader(thead) {
                 thead.innerHTML = ''; const tr = document.createElement('tr');
-                tr.innerHTML = `<th class="w-12 text-center no-print" title="Status">✓</th><th class="w-16 text-center">Shot</th>`;
+                tr.innerHTML = `<th class="w-12 text-center no-print" title="Status">✓</th><th class="w-16 text-center">ID</th>`;
                 visibleColumns.forEach(key => {
                     const th = document.createElement('th');
                     th.textContent = allColumns[key][0]; th.dataset.key = key; th.draggable = true;
@@ -181,17 +416,17 @@
                     const tr = document.createElement('tr');
                     tr.className = 'shot-item'; tr.draggable = true; tr.dataset.index = index;
                     if (shot.status) tr.classList.add('shot-completed');
-                    let rowHTML = `<td class="text-center no-print"><input type="checkbox" class="form-checkbox h-5 w-5 text-green-600 rounded status-checkbox" data-index="${index}" ${shot.status ? 'checked' : ''}></td><td class="text-center font-semibold">${shot.id}</td>`;
+                    let rowHTML = `<td class="text-center no-print"><input type="checkbox" class="form-checkbox h-5 w-5 text-[#1A3C34] rounded status-checkbox" data-index="${index}" ${shot.status ? 'checked' : ''}></td><td class="text-center font-semibold text-gray-500">${shot.id}</td>`;
                     visibleColumns.forEach(key => {
                         const value = shot[key] || ''; let content = '';
                         switch(key) {
-                             case 'image': content = `<div class="flex flex-col items-center justify-center gap-2"><img src="${value || 'https://placehold.co/120x67/e2e8f0/64748b?text=16:9'}" class="image-preview"><label class="no-print text-xs text-blue-600 hover:text-blue-800 cursor-pointer image-upload-trigger" data-index="${index}">Change</label></div>`; break;
-                             case 'description': content = `<textarea class="w-full p-2 border rounded-md" data-key="${key}" data-index="${index}" placeholder="Description...">${value}</textarea>`; break;
-                             default: content = `<input type="text" class="w-full p-2 border rounded-md" data-key="${key}" data-index="${index}" value="${value}" placeholder="...">`;
+                             case 'image': content = `<div class="flex flex-col items-center justify-center gap-2"><img src="${value || 'https://placehold.co/120x67/e2e8f0/64748b?text=Image'}" class="image-preview"><label class="no-print text-xs font-bold uppercase tracking-wider text-[#C7943E] hover:text-[#1A3C34] cursor-pointer image-upload-trigger" data-index="${index}">Edit</label></div>`; break;
+                             case 'description': content = `<textarea class="bg-transparent" data-key="${key}" data-index="${index}" placeholder="Description...">${value}</textarea>`; break;
+                             default: content = `<input type="text" data-key="${key}" data-index="${index}" value="${value}" placeholder="...">`;
                         }
                         rowHTML += `<td data-key="${key}">${content}</td>`;
                     });
-                    rowHTML += `<td class="text-center no-print"><button class="text-red-500 hover:text-red-700 text-xl font-bold delete-shot-button" title="Delete shot">&times;</button></td>`;
+                    rowHTML += `<td class="text-center no-print"><button class="text-red-400 hover:text-red-700 text-xl font-bold delete-shot-button" title="Delete shot">&times;</button></td>`;
                     tr.innerHTML = rowHTML;
                     tbody.appendChild(tr);
                 });
@@ -203,65 +438,55 @@
                     const card = document.createElement('div');
                     card.className = 'shot-item'; card.draggable = true; card.dataset.index = index;
                     if (shot.status) card.classList.add('shot-completed');
-                    const imageSrc = shot.image || 'https://placehold.co/1600x900/e2e8f0/64748b?text=Click+to+Upload';
+                    const imageSrc = shot.image || 'https://placehold.co/1600x900/e2e8f0/64748b?text=Upload+Image';
                     let detailsHTML = '';
                     visibleColumns.forEach(key => {
                         if (key === 'image') return;
-                        const label = allColumns[key][0]; const value = shot[key] || (key === 'description' ? 'No description.' : 'N/A');
+                        const label = allColumns[key][0]; const value = shot[key] || (key === 'description' ? 'No description.' : '—');
                         const isDesc = key === 'description'; const tag = isDesc ? 'p' : 'div';
                         const text = isDesc ? value : `<strong>${label}:</strong> ${value}`;
-                        detailsHTML += `<${tag} class="${isDesc ? 'description' : 'shot-details'} editable-field" data-key="${key}" data-index="${index}" title="Click to edit ${label}">${text}</${tag}>`;
+                        detailsHTML += `<${tag} class="${isDesc ? 'description mt-2 italic opacity-80' : 'shot-details'}" data-key="${key}" data-index="${index}" title="Click to edit">${text}</${tag}>`;
                     });
-                    card.innerHTML = `<div class="actions no-print"><button class="delete-shot-button" title="Delete shot">&times;</button></div><div class="image-preview-container image-upload-trigger" data-index="${index}"><img src="${imageSrc}" class="image-preview" alt="Shot ${shot.id} preview"></div><div class="shot-item-content"><div class="flex justify-between items-start"><h3 class="shot-title">Shot ${shot.id}</h3><input type="checkbox" class="form-checkbox h-5 w-5 text-green-600 rounded status-checkbox no-print" data-index="${index}" ${shot.status ? 'checked' : ''}></div>${detailsHTML}</div>`;
+                    card.innerHTML = `<div class="absolute top-2 right-2 flex gap-2 z-30 no-print"><button class="delete-shot-button bg-white/80 rounded-full w-6 h-6 flex items-center justify-center text-red-500 hover:text-red-700 font-bold">&times;</button></div><div class="image-preview-container image-upload-trigger group cursor-pointer" data-index="${index}"><img src="${imageSrc}" class="w-full h-full object-cover" alt="Shot ${shot.id}"></div><div class="shot-item-content"><div class="flex justify-between items-start mb-2"><h3 class="shot-title">Shot ${shot.id}</h3><input type="checkbox" class="form-checkbox h-5 w-5 text-[#1A3C34] rounded status-checkbox no-print" data-index="${index}" ${shot.status ? 'checked' : ''}></div>${detailsHTML}</div>`;
                     container.appendChild(card);
                 });
             }
 
+            // --- RESTORED EDIT FUNCTION ---
             function makeFieldEditable(element) {
                 if (element.querySelector('input, textarea')) return;
                 const key = element.dataset.key; const index = parseInt(element.dataset.index); const originalValue = shotData[index][key] || '';
                 let inputElement;
-                if (key === 'description') { inputElement = document.createElement('textarea'); inputElement.style.height = '120px'; } 
-                else { inputElement = document.createElement('input'); inputElement.type = 'text'; }
-                inputElement.value = originalValue; inputElement.className = 'w-full p-1 border rounded-md bg-white/80';
+                if (key === 'description') { inputElement = document.createElement('textarea'); inputElement.rows = 3; } else { inputElement = document.createElement('input'); inputElement.type = 'text'; }
+                inputElement.value = originalValue; inputElement.className = 'editing-input';
                 element.innerHTML = ''; element.appendChild(inputElement); inputElement.focus();
                 const save = () => { shotData[index][key] = inputElement.value; renderContent(); };
-                inputElement.addEventListener('blur', save, { once: true });
-                inputElement.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter' && key !== 'description') { inputElement.blur(); } 
-                    else if (e.key === 'Escape') { inputElement.removeEventListener('blur', save); renderContent(); }
-                });
+                inputElement.addEventListener('blur', save);
+                inputElement.addEventListener('keydown', (e) => { if (e.key === 'Enter' && key !== 'description') { inputElement.blur(); } });
             }
 
-            function updateUIText() {
-                pageSubtitle.textContent = "Design your film, shot by shot.";
-                switchViewButton.textContent = currentView === 'shot-list' ? 'Switch to Storyboard' : 'Switch to Shot List';
-                editFieldsButton.textContent = 'Edit Fields';
-            }
+            function updateUIText() { switchViewButton.textContent = currentView === 'shot-list' ? 'View: Storyboard' : 'View: Shot List'; }
 
             function openCropper(imageSrc, index) { editingShotIndex = index; cropperImage.src = imageSrc; cropperModal.classList.remove('hidden'); cropperModal.classList.add('flex'); if (cropper) cropper.destroy(); cropper = new Cropper(cropperImage, { aspectRatio: 16 / 9, viewMode: 2, background: false }); }
             function closeCropper() { if (cropper) cropper.destroy(); cropper = null; editingShotIndex = null; cropperImage.src = ''; cropperModal.classList.add('hidden'); cropperModal.classList.remove('flex'); }
             
             function validateTitle() {
                 const title = documentTitleInput.value.trim();
-                if (!title) {
-                    documentTitleInput.classList.add('border-red-500', 'ring', 'ring-red-500'); documentTitleInput.focus();
-                    alert("Please enter a document title before saving."); return null;
-                }
-                documentTitleInput.classList.remove('border-red-500', 'ring', 'ring-red-500');
-                return title;
+                if (!title) { documentTitleInput.style.borderBottomColor = '#ef4444'; documentTitleInput.focus(); alert("Please enter a document title before saving."); return null; }
+                documentTitleInput.style.borderBottomColor = ''; return title;
             }
 
             async function saveAsPdf() {
-                const title = validateTitle();
-                if (!title) return;
-
+                const title = validateTitle(); if (!title) return;
                 savePdfButton.textContent = "Generating..."; savePdfButton.disabled = true;
                 const printStyle = document.createElement('style');
+                // Added specific rules to FORCE sans-serif during PDF generation
                 printStyle.innerHTML = `
-                    .no-print { display: none !important; }
-                    .shot-list-view { table-layout: fixed !important; width: 100% !important; }
-                    .shot-list-view td, .shot-list-view th { word-wrap: break-word !important; }
+                    .no-print { display: none !important; } 
+                    .shot-list-view { table-layout: fixed !important; width: 100% !important; } 
+                    .shot-list-view td, .shot-list-view th { word-wrap: break-word !important; } 
+                    body, .shot-title, .shot-details, .description, .shot-list-view td { font-family: 'Inter', sans-serif !important; }
+                    body { background: white !important; }
                 `;
                 document.head.appendChild(printStyle);
                 await new Promise(resolve => setTimeout(resolve, 100));
@@ -269,32 +494,25 @@
                 try {
                     const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
                     const toDataURL = url => fetch(url).then(r=>r.blob()).then(b=>new Promise((res,rej)=>{const r=new FileReader();r.onloadend=()=>res(r.result);r.onerror=rej;r.readAsDataURL(b)}));
-                    let logoDataURL; try { logoDataURL = await toDataURL('https://harrysteel.co.uk/Harry%20Logo%20V4.png'); } catch (e) { console.error(e); }
-                    const pageWidth = doc.internal.pageSize.getWidth(), pageHeight = doc.internal.pageSize.getHeight(), margin = 30;
+                    let logoDataURL; try { logoDataURL = await toDataURL('https://harrysteel.co.uk/Logo.png'); } catch (e) {}
                     
+                    const pageWidth = doc.internal.pageSize.getWidth(), pageHeight = doc.internal.pageSize.getHeight(), margin = 30;
                     const addPageTopHeader = () => {
-                        if (logoDataURL) doc.addImage(logoDataURL, 'PNG', margin, margin, 44, 22);
-                        doc.setFontSize(18); doc.setFont("helvetica", "bold"); doc.text(title, pageWidth / 2, margin + 18, { align: 'center' });
-                        const titleBottomY = margin + 35;
-                        doc.setDrawColor(180); doc.line(margin, titleBottomY, pageWidth - margin, titleBottomY);
-                        return titleBottomY + 10;
+                        doc.setFontSize(18); doc.setFont("helvetica", "bold"); doc.setTextColor(26, 60, 52); 
+                        doc.text(title, margin, margin + 20); doc.setDrawColor(200); doc.line(margin, margin + 35, pageWidth - margin, margin + 35);
+                        return margin + 50;
                     };
 
                     if (currentView === 'shot-list') {
                         const contentClone = contentWrapper.cloneNode(true); 
-                        contentClone.querySelectorAll('textarea, input[type="text"]').forEach(input => {
-                            const cell = input.parentElement;
-                            cell.style.verticalAlign = 'top';
-                            cell.innerHTML = `<div style="white-space: pre-wrap;">${input.value.replace(/\n/g, '<br/>')}</div>`;
-                        });
+                        contentClone.querySelectorAll('textarea, input[type="text"]').forEach(input => { const cell = input.parentElement; cell.style.verticalAlign = 'top'; 
+                        // CHANGED: font-family to sans-serif for the PDF text replacement
+                        cell.innerHTML = `<div style="white-space: pre-wrap; font-family: sans-serif;">${input.value.replace(/\n/g, '<br/>')}</div>`; });
                         document.body.appendChild(contentClone);
-                        const tableClone = contentClone.querySelector('#shot-list-table');
-                        tableClone.style.width = '1200px'; 
+                        const tableClone = contentClone.querySelector('#shot-list-table'); tableClone.style.width = '1100px'; 
                         const headerCanvas = await html2canvas(tableClone.querySelector('thead'), { scale: 2 });
-                        const contentWidth = pageWidth - 2 * margin;
-                        const headerPdfHeight = (headerCanvas.height * contentWidth) / headerCanvas.width;
-                        let yPosition;
-                        const addListPageHeader = () => { yPosition = addPageTopHeader(); doc.addImage(headerCanvas.toDataURL('image/png'), 'PNG', margin, yPosition, contentWidth, headerPdfHeight); yPosition += headerPdfHeight; };
+                        const contentWidth = pageWidth - 2 * margin; const headerPdfHeight = (headerCanvas.height * contentWidth) / headerCanvas.width;
+                        let yPosition; const addListPageHeader = () => { yPosition = addPageTopHeader(); doc.addImage(headerCanvas.toDataURL('image/png'), 'PNG', margin, yPosition, contentWidth, headerPdfHeight); yPosition += headerPdfHeight; };
                         addListPageHeader();
                         for (const row of Array.from(tableClone.querySelectorAll('tbody tr'))) {
                             const rowCanvas = await html2canvas(row, { scale: 2, backgroundColor: row.classList.contains('shot-completed')?'#f0fdf4':null });
@@ -308,7 +526,7 @@
                         const cardGap = 15; const cardWidth = (pageWidth - (margin * 2) - (cardGap * 3)) / 4;
                         let cardCount = 0; let rowHeight = 0;
                         for (const card of Array.from(contentWrapper.querySelectorAll('.shot-item'))) {
-                            const cardCanvas = await html2canvas(card, { scale: 2, backgroundColor: card.classList.contains('shot-completed')?'#f0fdf4':null });
+                            const cardCanvas = await html2canvas(card, { scale: 2 });
                             const cardHeight = (cardCanvas.height * cardWidth) / cardCanvas.width;
                             rowHeight = Math.max(rowHeight, cardHeight);
                             if (cardCount > 0 && cardCount % 8 === 0) { doc.addPage(); yPosition = addPageTopHeader(); xPosition = margin; rowHeight = 0; }
@@ -320,50 +538,47 @@
                     }
                     const safeFilename = title.replace(/[^a-z0-9\s-]/gi, '').replace(/\s+/g, '-').toLowerCase();
                     doc.save(`${safeFilename || 'document'}.pdf`);
-                } catch(error) {
-                    console.error("PDF Generation failed:", error);
-                    alert("An error occurred generating the PDF. Please check the console.");
-                } finally {
-                    document.head.removeChild(printStyle);
-                    savePdfButton.textContent = "Save as PDF"; savePdfButton.disabled = false;
-                }
+                } catch(error) { console.error(error); alert("PDF Error."); } finally { document.head.removeChild(printStyle); savePdfButton.textContent = "Export PDF"; savePdfButton.disabled = false; }
             }
 
             function attachEventListeners() {
                 switchViewButton.addEventListener('click', () => { currentView = (currentView === 'shot-list') ? 'storyboard' : 'shot-list'; renderContent(); });
-                contentWrapper.addEventListener('click', (e) => { const target = e.target; const item = target.closest('.shot-item'); if (!item) return; const index = parseInt(item.dataset.index); if (target.closest('.delete-shot-button')) { deleteShotRow(index); } else if (target.closest('.editable-field')) { makeFieldEditable(target.closest('.editable-field')); } else if (target.closest('.image-upload-trigger')) { editingShotIndex = index; imageUploadInput.click(); }});
-                contentWrapper.addEventListener('change', (e) => { const target = e.target; const item = target.closest('.shot-item') || document.querySelector(`.shot-item[data-index='${target.dataset.index}']`); if (!item) return; const index = parseInt(item.dataset.index); if (target.matches('.status-checkbox')) { shotData[index].status = target.checked; renderContent(); } else if (target.matches('textarea, input[type="text"]')) { shotData[index][target.dataset.key] = target.value; }});
+                contentWrapper.addEventListener('click', (e) => { 
+                    const target = e.target; const item = target.closest('.shot-item'); if (!item) return; 
+                    const index = parseInt(item.dataset.index); 
+                    if (target.closest('.delete-shot-button')) { deleteShotRow(index); } 
+                    else if (target.closest('.image-upload-trigger')) { editingShotIndex = index; imageUploadInput.click(); }
+                    // Trigger Editing
+                    else if (target.closest('.shot-details') || target.closest('.description')) {
+                         makeFieldEditable(target.closest('.shot-details') || target.closest('.description'));
+                    }
+                });
+                contentWrapper.addEventListener('change', (e) => { 
+                    const target = e.target; const item = target.closest('.shot-item') || document.querySelector(`.shot-item[data-index='${target.dataset.index}']`); if (!item) return; 
+                    const index = parseInt(item.dataset.index); 
+                    if (target.matches('.status-checkbox')) { shotData[index].status = target.checked; renderContent(); } 
+                    else if (target.matches('textarea, input[type="text"]')) { shotData[index][target.dataset.key] = target.value; }
+                });
                 contentWrapper.addEventListener('dragstart', (e) => { const item = e.target.closest('.shot-item'); if (item) { draggedItemIndex = parseInt(item.dataset.index); e.dataTransfer.effectAllowed = 'move'; setTimeout(() => item.classList.add('row-dragging'), 0); } const th = e.target.closest('th[draggable="true"]'); if (th) { draggedColumnKey = th.dataset.key; setTimeout(() => th.classList.add('col-dragging'), 0); }});
                 contentWrapper.addEventListener('dragover', (e) => { e.preventDefault(); const th = e.target.closest('th[draggable="true"]'); if(th && draggedColumnKey) { contentWrapper.querySelectorAll('th.col-drag-over').forEach(el => el.classList.remove('col-drag-over')); th.classList.add('col-drag-over'); } });
                 contentWrapper.addEventListener('dragleave', (e) => e.target.closest('th')?.classList.remove('col-drag-over'));
                 contentWrapper.addEventListener('drop', (e) => { e.preventDefault(); if (draggedItemIndex !== null) { const toItem = e.target.closest('.shot-item'); if (toItem) { const toIndex = parseInt(toItem.dataset.index); if (draggedItemIndex !== toIndex) { const [draggedItem] = shotData.splice(draggedItemIndex, 1); shotData.splice(toIndex, 0, draggedItem); resequenceShotIds(); renderContent(); } } } else if (draggedColumnKey !== null) { const th = e.target.closest('th[draggable="true"]'); if (th) { const fromIndex = visibleColumns.indexOf(draggedColumnKey); const toIndex = visibleColumns.indexOf(th.dataset.key); if (fromIndex !== -1 && toIndex !== -1) { const [item] = visibleColumns.splice(fromIndex, 1); visibleColumns.splice(toIndex, 0, item); renderContent(); } } } const draggedEl = contentWrapper.querySelector('.row-dragging'); if(draggedEl) draggedEl.classList.remove('row-dragging'); draggedItemIndex = null; draggedColumnKey = null; });
                 document.addEventListener('dragend', () => { if(draggedColumnKey) { contentWrapper.querySelectorAll('th.col-dragging, th.col-drag-over').forEach(el => el.classList.remove('col-dragging', 'col-drag-over')); draggedColumnKey = null; } if (draggedItemIndex !== null) { const draggedEl = contentWrapper.querySelector('.row-dragging'); if (draggedEl) draggedEl.classList.remove('row-dragging'); draggedItemIndex = null; }});
                 imageUploadInput.addEventListener('change', (e) => { const file = e.target.files[0]; if (file && editingShotIndex !== null) { const reader = new FileReader(); reader.onload = (event) => openCropper(event.target.result, editingShotIndex); reader.readAsDataURL(file); } e.target.value = ''; });
-                addShotButton.addEventListener('click', addShotRow);
-                saveJsonButton.addEventListener('click', saveListToFile);
-                loadJsonInput.addEventListener('change', loadListFromFile);
-                editFieldsButton.addEventListener('click', openColumnsModal);
-                columnsModalCloseButton.addEventListener('click', closeColumnsModal);
+                addShotButton.addEventListener('click', addShotRow); saveJsonButton.addEventListener('click', saveListToFile); loadJsonInput.addEventListener('change', loadListFromFile); editFieldsButton.addEventListener('click', openColumnsModal); columnsModalCloseButton.addEventListener('click', closeColumnsModal);
                 cropperSaveButton.addEventListener('click', () => { if (!cropper || editingShotIndex === null) return; const canvas = cropper.getCroppedCanvas({ width: 1280, height: 720, imageSmoothingQuality: 'high' }); shotData[editingShotIndex].image = canvas.toDataURL('image/jpeg', 0.9); closeCropper(); renderContent(); });
-                cropperCancelButton.addEventListener('click', closeCropper);
-                savePdfButton.addEventListener('click', saveAsPdf);
-                mobileMenuButton.addEventListener('click', () => buttonGrid.classList.toggle('menu-open'));
+                cropperCancelButton.addEventListener('click', closeCropper); savePdfButton.addEventListener('click', saveAsPdf); mobileMenuButton.addEventListener('click', () => buttonGrid.classList.toggle('menu-open'));
             }
             
             function addShotRow() { shotData.push({ id: nextShotId++, status: false, image: '', description: '', shotSize: '', shotType: '' }); resequenceShotIds(); renderContent(); }
             function deleteShotRow(index) { if (confirm('Are you sure you want to delete this shot?')) { if (shotData.length > 0) { shotData.splice(index, 1); if (shotData.length === 0) { addShotRow(); } else { resequenceShotIds(); renderContent(); } } } }
             function resequenceShotIds() { shotData.forEach((shot, index) => { shot.id = index + 1; }); nextShotId = shotData.length + 1; }
-            function openColumnsModal() { columnsChecklist.innerHTML = ''; const currentColumnOrder = [...visibleColumns]; Object.keys(allColumns).forEach(key => { const labelText = allColumns[key][0]; const isChecked = currentColumnOrder.includes(key); columnsChecklist.innerHTML += `<label class="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-100 cursor-pointer"><input type="checkbox" data-key="${key}" class="form-checkbox h-5 w-5 text-blue-600 rounded" ${isChecked ? 'checked' : ''}><span class="text-gray-700">${labelText}</span></label>`; }); columnsModal.classList.remove('hidden'); columnsModal.classList.add('flex'); }
+            function openColumnsModal() { columnsChecklist.innerHTML = ''; const currentColumnOrder = [...visibleColumns]; Object.keys(allColumns).forEach(key => { const labelText = allColumns[key][0]; const isChecked = currentColumnOrder.includes(key); columnsChecklist.innerHTML += `<label class="flex items-center space-x-2 p-2 rounded-md hover:bg-black/5 cursor-pointer"><input type="checkbox" data-key="${key}" class="form-checkbox h-5 w-5 text-[#1A3C34] rounded" ${isChecked ? 'checked' : ''}><span class="text-gray-700 font-serif">${labelText}</span></label>`; }); columnsModal.classList.remove('hidden'); columnsModal.classList.add('flex'); }
             function closeColumnsModal() { const checkedInputs = columnsChecklist.querySelectorAll('input:checked'); const newVisibleColumns = Array.from(checkedInputs).map(input => input.dataset.key); const oldVisibleColumns = visibleColumns.filter(key => newVisibleColumns.includes(key)); const newlyAddedColumns = newVisibleColumns.filter(key => !visibleColumns.includes(key)); visibleColumns = [...oldVisibleColumns, ...newlyAddedColumns]; columnsModal.classList.add('hidden'); columnsModal.classList.remove('flex'); renderContent(); }
             function saveListToFile() { const title = validateTitle(); if(!title) return; const dataToSave = { documentTitle: title, shotData, visibleColumns, currentView }; const jsonString = JSON.stringify(dataToSave, null, 2); const blob = new Blob([jsonString], {type: "application/json"}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); const safeFilename = title.replace(/[^a-z0-9\s-]/gi, '').replace(/\s+/g, '-').toLowerCase(); a.download = `${safeFilename || 'shotlist'}.json`; a.href = url; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); }
             function loadListFromFile(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (e) => { try { const loadedData = JSON.parse(e.target.result); if (loadedData.shotData) { shotData = loadedData.shotData; if(loadedData.visibleColumns) visibleColumns = loadedData.visibleColumns; if(loadedData.currentView) currentView = loadedData.currentView; if(loadedData.documentTitle) documentTitleInput.value = loadedData.documentTitle; resequenceShotIds(); renderContent(); } else { alert('Invalid file format.'); } } catch (error) { console.error("Failed to parse JSON file:", error); alert('Could not load the file.'); } }; reader.readAsText(file); event.target.value = null; }
             
-            function initialize() {
-                attachEventListeners();
-                if (shotData.length === 0) { addShotRow(); } 
-                else { renderContent(); }
-            }
-            
+            function initialize() { attachEventListeners(); if (shotData.length === 0) { addShotRow(); } else { renderContent(); } }
             initialize();
         });
     </script>
