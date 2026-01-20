@@ -479,6 +479,7 @@
             async function saveAsPdf() {
                 const title = validateTitle(); if (!title) return;
                 savePdfButton.textContent = "Generating..."; savePdfButton.disabled = true;
+                
                 const printStyle = document.createElement('style');
                 // Added specific rules to FORCE sans-serif during PDF generation
                 printStyle.innerHTML = `
@@ -504,9 +505,9 @@
                     };
 
                     if (currentView === 'shot-list') {
+                        // --- SHOT LIST VIEW EXPORT (Unchanged) ---
                         const contentClone = contentWrapper.cloneNode(true); 
                         contentClone.querySelectorAll('textarea, input[type="text"]').forEach(input => { const cell = input.parentElement; cell.style.verticalAlign = 'top'; 
-                        // CHANGED: font-family to sans-serif for the PDF text replacement
                         cell.innerHTML = `<div style="white-space: pre-wrap; font-family: sans-serif;">${input.value.replace(/\n/g, '<br/>')}</div>`; });
                         document.body.appendChild(contentClone);
                         const tableClone = contentClone.querySelector('#shot-list-table'); tableClone.style.width = '1100px'; 
@@ -522,18 +523,58 @@
                         }
                         document.body.removeChild(contentClone);
                     } else { 
-                        let yPosition = addPageTopHeader(); let xPosition = margin;
-                        const cardGap = 15; const cardWidth = (pageWidth - (margin * 2) - (cardGap * 3)) / 4;
-                        let cardCount = 0; let rowHeight = 0;
-                        for (const card of Array.from(contentWrapper.querySelectorAll('.shot-item'))) {
-                            const cardCanvas = await html2canvas(card, { scale: 2 });
-                            const cardHeight = (cardCanvas.height * cardWidth) / cardCanvas.width;
-                            rowHeight = Math.max(rowHeight, cardHeight);
-                            if (cardCount > 0 && cardCount % 8 === 0) { doc.addPage(); yPosition = addPageTopHeader(); xPosition = margin; rowHeight = 0; }
-                            else if (cardCount > 0 && cardCount % 4 === 0) { yPosition += rowHeight + cardGap; xPosition = margin; rowHeight = 0; }
-                            if (yPosition + cardHeight > pageHeight - margin && cardCount > 0 && (cardCount % 4 !== 0)) { doc.addPage(); yPosition = addPageTopHeader(); xPosition = margin; rowHeight = 0; }
-                            doc.addImage(cardCanvas.toDataURL('image/png'), 'PNG', xPosition, yPosition, cardWidth, cardHeight);
-                            xPosition += cardWidth + cardGap; cardCount++;
+                        // --- STORYBOARD VIEW EXPORT (Fixed for Equal Heights) ---
+                        let yPosition = addPageTopHeader(); 
+                        let xPosition = margin;
+                        const cardGap = 15; 
+                        const cardWidth = (pageWidth - (margin * 2) - (cardGap * 3)) / 4;
+                        let maxRowHeight = 0; // Tracks height of the previous row to calculate Y offset
+
+                        const shotItems = Array.from(contentWrapper.querySelectorAll('.shot-item'));
+
+                        // Process in rows of 4
+                        for (let i = 0; i < shotItems.length; i += 4) {
+                            const rowItems = shotItems.slice(i, i + 4);
+                            
+                            // 1. Force Equal Heights: Find tallest item in this row and apply to all
+                            const domHeight = Math.max(...rowItems.map(el => el.getBoundingClientRect().height));
+                            rowItems.forEach(el => el.style.height = `${domHeight}px`);
+                            
+                            // 2. Capture Canvases & Calculate PDF Height for this row
+                            const canvases = [];
+                            let currentRowPdfHeight = 0;
+                            
+                            for (const card of rowItems) {
+                                const canvas = await html2canvas(card, { scale: 2 });
+                                canvases.push(canvas);
+                                const h = (canvas.height * cardWidth) / canvas.width;
+                                if (h > currentRowPdfHeight) currentRowPdfHeight = h;
+                            }
+
+                            // 3. Position Logic
+                            if (i > 0) {
+                                // Move down by the height of the PREVIOUS row
+                                yPosition += maxRowHeight + cardGap;
+                                
+                                // Check for Page Break (Every 8 items OR if this row overflows)
+                                if (i % 8 === 0 || (yPosition + currentRowPdfHeight > pageHeight - margin)) {
+                                    doc.addPage();
+                                    yPosition = addPageTopHeader();
+                                    // xPosition resets automatically below
+                                }
+                            }
+
+                            // 4. Draw Row
+                            xPosition = margin;
+                            for (const canvas of canvases) {
+                                const h = (canvas.height * cardWidth) / canvas.width; // Should be identical for all in row now
+                                doc.addImage(canvas.toDataURL('image/png'), 'PNG', xPosition, yPosition, cardWidth, h);
+                                xPosition += cardWidth + cardGap;
+                            }
+                            
+                            // 5. Cleanup
+                            maxRowHeight = currentRowPdfHeight; // Store for next loop
+                            rowItems.forEach(el => el.style.height = ''); // Remove forced height
                         }
                     }
                     const safeFilename = title.replace(/[^a-z0-9\s-]/gi, '').replace(/\s+/g, '-').toLowerCase();
