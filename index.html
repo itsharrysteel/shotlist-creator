@@ -170,7 +170,7 @@
             vertical-align: middle;
         }
 
-        /* Scene rowspan cells get a subtle left border to group visually */
+        /* Scene cells — shared base */
         .shot-list-view td.scene-span-cell {
             vertical-align: middle;
             text-align: center;
@@ -178,9 +178,24 @@
             font-weight: 600;
             font-size: 0.85rem;
             color: var(--deep-forest);
-            border-left: 3px solid var(--spiced-ochre);
-            border-right: 1px solid var(--grid-line);
             background: rgba(26, 60, 52, 0.02);
+            border-left: 3px solid transparent;
+        }
+        /* Gold bar only on group-start rows */
+        .shot-list-view td.scene-span-cell.scene-group-start {
+            border-left-color: var(--spiced-ochre);
+        }
+        /* Continuation rows: input invisible until focused */
+        .shot-list-view td.scene-span-cell.scene-continuation input {
+            opacity: 0;
+            transition: opacity 0.15s;
+        }
+        .shot-list-view td.scene-span-cell.scene-continuation:focus-within input {
+            opacity: 1;
+        }
+        /* Remove top border on continuation scene cells so groups look joined */
+        .shot-list-view td.scene-continuation {
+            border-top: none;
         }
 
         .shot-list-view input[type="text"], .shot-list-view textarea {
@@ -551,18 +566,15 @@
                         if (col.compact) td.classList.add('col-compact');
 
                         if (key === 'scene') {
-                            // Show value only on first row of a group; continuation rows show
-                            // a faint border-only cell so the grouping is still visually clear.
                             const isFirst = sceneFirstFlags[index];
                             td.classList.add('scene-span-cell');
-                            if (isFirst) {
-                                td.innerHTML = `<input type="text" data-key="scene" data-index="${index}" value="${value}" placeholder="—" style="text-align:center; font-family:inherit; font-weight:600; font-size:0.85rem; color:var(--deep-forest); width:3rem;">`;
-                            } else {
-                                // Continuation: editable but visually suppressed
-                                td.style.borderTop = 'none';
-                                td.style.opacity = '0';
-                                td.innerHTML = `<input type="text" data-key="scene" data-index="${index}" value="${value}" placeholder="—" style="width:3rem; pointer-events:none;">`;
-                            }
+                            td.classList.add(isFirst ? 'scene-group-start' : 'scene-continuation');
+                            // Both first and continuation rows get a fully interactive input.
+                            // Continuation inputs are hidden via CSS opacity until focused —
+                            // clicking the blank cell reveals the input so you can change the value.
+                            // When saved, scene values on all rows are stored individually so
+                            // changing a continuation row breaks it into a new group.
+                            td.innerHTML = `<input type="text" data-key="scene" data-index="${index}" value="${value}" placeholder="—" style="text-align:center; font-family:inherit; font-weight:600; font-size:0.85rem; color:var(--deep-forest); width:3rem;">`;
                         } else {
                             let content = '';
                             switch(key) {
